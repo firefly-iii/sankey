@@ -105,6 +105,7 @@ class ProcessTransactions implements ShouldQueue
     {
         $return = [];
         Log::debug(sprintf('Downloading transactions for %s', $this->identifier));
+        Log::debug(sprintf('Firefly III URL: %s', $this->url));
         // download per month, join results, then return.
         $date = Carbon::create($this->year, 1, 1);
         $end  = Carbon::create($this->year, 12, 31);
