@@ -7,6 +7,7 @@ use App\Models\DataSet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Ramsey\Uuid\Uuid;
+use Log;
 
 /**
  * Class IndexController
@@ -54,6 +55,7 @@ class IndexController
         $validated['ignore_budgets']    = array_map('intval', $validated['ignore_budgets']);
 
         $identifier = session()->get('identifier');
+        Log::debug(sprintf('Stored new job under identifier %s', $identifier));
         ProcessTransactions::dispatch($identifier, $validated);
         return redirect(route('diagram'));
     }
