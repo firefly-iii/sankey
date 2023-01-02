@@ -2,23 +2,10 @@
 {% block content %}
     <div class="row">
         <div class="col">
+            <h3>Welcome!</h3>
             <p class="lead">
-                Please read the following disclaimer and information. Then, enter your Firefly III URL and a Personal
-                Access
-                Token.
-            </p>
-            <h3>Information and disclaimer</h3>
-            <p>
-                This tool will generate a sankey diagram of the transactions stored in <em>your</em> Firefly III
-                instance.
-                To do so, it will download the necessary transactions and process them. Although no data is permanently
-                stored on the server, all your financial information will flow through this server (an Azure VM)
-                and you have no guarantees the server isn't hacked, the data's not stored secretly or foreign agents
-                aren't secretly monitoring what the server is doing.
-            </p>
-            <p>
-                So the disclaimer: don't use this tool. Download it from GitHub instead and run it yourself. If you do
-                wish to continue, on your own head be it. Jobs and data will be stored for 24hrs.
+                Welcome! <a href="https://github.com/firefly-iii/sankey">This tool</a> can generate a "sankey diagram"
+                of your personal finances.
             </p>
         </div>
     </div>
@@ -37,6 +24,7 @@
                 <div class="row mb-3">
                     <div class="col-4">
                         <label for="token">Personal Access Token</label>
+                        <div class="form-text">Generate a token on the <code>/profile</code>-page of your Firefly III installation.</div>
                     </div>
                     <div class="col-4">
                         <input type="text" required class="form-control" id="token" name="token" placeholder="Your personal access token">
@@ -53,39 +41,45 @@
                 <div class="row mb-3">
                     <div class="col-4">
                         <label for="ignore_accounts">Optional: ignore these account ID's</label>
-                    </div>
-                    <div class="col-4">
-                        <input type="text" class="form-control" id="ignore_accounts" name="ignore_accounts" placeholder="Comma separated list of account ID's to ignore.">
                         <div  class="form-text">
                             Comma-separated list. These source or destination accounts will not be included in the diagram.
                         </div>
+                    </div>
+                    <div class="col-4">
+                        <input type="text" class="form-control" id="ignore_accounts" name="ignore_accounts" placeholder="1,2,3">
+
                     </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-4">
                         <label for="ignore_categories">Optional: ignore these category ID's</label>
-                    </div>
-                    <div class="col-4">
-                        <input type="text" class="form-control" id="ignore_categories" name="ignore_categories" placeholder="0,1,2">
                         <div  class="form-text">
                             Comma-separated list. These categories will not be included in the diagram. To ignore transactions without a category, add <code>0</code> to the list.
                         </div>
+                    </div>
+                    <div class="col-4">
+                        <input type="text" class="form-control" id="ignore_categories" name="ignore_categories" placeholder="0,1,2">
+
                     </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-4">
                         <label for="ignore_budgets">Optional: ignore these budget ID's</label>
-                    </div>
-                    <div class="col-4">
-                        <input type="text" class="form-control" id="ignore_budgets" name="ignore_budgets" placeholder="0,1,2">
                         <div class="form-text">
                             Comma-separated list. These budgets will not be included in the diagram. To ignore transactions without a budgets, add <code>0</code> to the list.
                         </div>
+                    </div>
+                    <div class="col-4">
+                        <input type="text" class="form-control" id="ignore_budgets" name="ignore_budgets" placeholder="0,1,2">
+
                     </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-4">
                         <label for="draw_destinations">Optional: also draw destinations</label>
+                        <div class="form-text">
+                            Makes a messy diagram usually.
+                        </div>
                     </div>
                     <div class="col-4">
                         <div class="form-check">
@@ -94,9 +88,7 @@
                                 Also draw destinations
                             </label>
                         </div>
-                        <div class="form-text">
-                            Makes a messy diagram usually.
-                        </div>
+
 
                     </div>
                 </div>
@@ -108,39 +100,20 @@
             </form>
         </div>
     </div>
-
-    <!--
-
-                </div>
-                <div class="form-group">
-
-
-
-                </div>
-                <div class="form-group">
-                    <label for="ignore_categories">Optional: ignore these category ID's</label>
-                    <input type="text" class="form-control" id="ignore_categories" name="ignore_categories"
-                           placeholder="Comma separated list of categories ID's to ignore."><br>
-                    <small class="muted">Comma separated list of categories ID's to ignore. Use <code>0</code> to ignore
-                        transactions with no category.</small>
-                </div>
-                <div class="form-group">
-                    <label for="ignore">Optional: ignore these budgets ID's</label>
-                    <input type="text" class="form-control" id="ignore_budgets" name="ignore_budgets"
-                           placeholder="Comma separated list of budget ID's to ignore."><br>
-                    <small class="muted">Comma separated list of categories ID's to ignore. Use <code>0</code> to ignore
-                        transactions with no budget.</small>
-                </div>
-                <div class="form-group">
-                    <label for="draw_destination">Optional: draw destination account</label>
-                    <input type="checkbox" class="form-control" id="draw_destination" name="draw_destination">
-                    <br>Also draw destination accounts. Often just makes it messy.
-                </div>
-
-    </form>
+    <div class="row">
+        <div class="col-6">
+            <h3>Information and disclaimer</h3>
+            <p class="small">To generate a diagram this application downloads the necessary transactions and processes them locally.
+                No data is permanently stored on the server. You can inspect the source code <a href="https://github.com/firefly-iii/sankey">on GitHub</a>.
+            </p>
+            <p class="small">All your financial information will flow through this server (an Azure VM). Think about the following things before you use this application.</p>
+            <ul>
+                <li class="small">The server may be hacked and I don't know it</li>
+                <li class="small">I may be secretly reading all your financial transactions</li>
+            </ul>
+            <p class="small">
+                I take <strong>no responsibility</strong> for any damage caused by this application. Use at your own risk.
+            </p>
+        </div>
     </div>
-    </div>
-    -->
-{% endblock %}
-{% block scripts %}
 {% endblock %}
