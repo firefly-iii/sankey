@@ -30,7 +30,7 @@ class ProcessTransactions implements ShouldQueue
     public bool     $drawDestination;
     public int      $tries    = 5;
     private DataSet $dataSet;
-    public int      $year = 2022;
+    public int      $year     = 2022;
     private string  $budgeted = 'All money';
 
     /**
@@ -155,6 +155,7 @@ class ProcessTransactions implements ShouldQueue
      */
     private function createBasicDiagram(array $transactions): array
     {
+        Log::debug(sprintf('Generate basic diagram from %d transaction(s)', count($transactions)));
         $result = [];
         /** @var TransactionGroup $group */
         foreach ($transactions as $group) {
@@ -257,8 +258,7 @@ class ProcessTransactions implements ShouldQueue
             }
         );
         ksort($result);
-
-
+        Log::debug(sprintf('Generated basic diagram with %d flows from %d transaction(s)', count($result), count($transactions)));
 
         return $result;
     }
