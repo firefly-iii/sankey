@@ -31,10 +31,11 @@ class ProcessTransactions implements ShouldQueue
     public bool     $drawDestination;
     public int      $tries        = 5;
     private DataSet $dataSet;
-    public int      $year         = 2022;
     private string  $budgeted     = 'All money';
     private bool    $error        = false;
     private string  $errorMessage = '';
+    private Carbon  $start;
+    private Carbon  $end;
 
     /**
      * Create a new job instance.
@@ -50,7 +51,8 @@ class ProcessTransactions implements ShouldQueue
         $this->ignoreBudgets    = $parameters['ignore_budgets'];
         $this->ignoreCategories = $parameters['ignore_categories'];
         $this->drawDestination  = $parameters['draw_destinations'];
-        $this->year             = $parameters['year'];
+        $this->start            = $parameters['start'];
+        $this->end              = $parameters['end'];
     }
 
     /**
@@ -119,11 +121,17 @@ class ProcessTransactions implements ShouldQueue
         Log::debug(sprintf('Downloading transactions for %s', $this->identifier));
         Log::debug(sprintf('Firefly III URL: %s', $this->url));
         // download per month, join results, then return.
-        $date = Carbon::create($this->year, 1, 1);
-        $end  = Carbon::create($this->year, 12, 31);
+        $date = clone $this->start;
+        $end  = clone $this->end;
         while ($date->isBefore($end)) {
             $endOfMonth = clone $date;
             $endOfMonth->endOfMonth();
+
+            // small catch in case we overflow:
+            if($endOfMonth->isAfter($end)) {
+                $endOfMonth = clone $end;
+            }
+
             Log::debug(sprintf('Period is now %s to %s', $date->format('Y-m-d'), $endOfMonth->format('Y-m-d')));
 
             // first download withdrawals:

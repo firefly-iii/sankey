@@ -9,6 +9,15 @@
             </p>
         </div>
     </div>
+    {% if errors.any %}
+    <div class="alert alert-danger">
+        <ul>
+            {% for error in errors.all %}
+            <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
     <div class="row">
         <div class="col">
             <form action="{{ route('post') }}" method="post">
@@ -32,10 +41,18 @@
                 </div>
                 <div class="row mb-3">
                     <div class="col-4">
-                        <label for="year">Year</label>
+                        <label for="start">Start date</label>
                     </div>
                     <div class="col-4">
-                        <input type="text" class="form-control" id="year" name="year" placeholder="2022" value="2022">
+                        <input type="date" class="form-control" id="start" name="start" placeholder="2022-01-01" value="2022-01-01">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-4">
+                        <label for="end">End date</label>
+                    </div>
+                    <div class="col-4">
+                        <input type="date" class="form-control" id="end" name="end" placeholder="2022-12-31" value="2022-12-31">
                     </div>
                 </div>
                 <div class="row mb-3">
