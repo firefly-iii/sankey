@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\DataSet;
 use Carbon\Carbon;
+use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Transaction;
 use GrumpyDictator\FFIIIApiSupport\Model\TransactionGroup;
 use GrumpyDictator\FFIIIApiSupport\Request\GetTransactionsRequest;
@@ -28,10 +29,12 @@ class ProcessTransactions implements ShouldQueue
     public array    $ignoreBudgets;
     public array    $ignoreCategories;
     public bool     $drawDestination;
-    public int      $tries    = 5;
+    public int      $tries        = 5;
     private DataSet $dataSet;
-    public int      $year     = 2022;
-    private string  $budgeted = 'All money';
+    public int      $year         = 2022;
+    private string  $budgeted     = 'All money';
+    private bool    $error        = false;
+    private string  $errorMessage = '';
 
     /**
      * Create a new job instance.
@@ -62,7 +65,13 @@ class ProcessTransactions implements ShouldQueue
         if (null === $dataset) {
             $dataset             = new DataSet();
             $dataset->identifier = $this->identifier;
-            $dataset->data       = json_encode(['processing' => true,]);
+            $dataset->data       = json_encode(
+                [
+                    'processing'    => true,
+                    'error'         => false,
+                    'error_message' => '',
+                ]
+            );
             $dataset->save();
         }
         $this->dataSet = $dataset;
@@ -92,8 +101,10 @@ class ProcessTransactions implements ShouldQueue
         $basicDiagram        = $this->createBasicDiagram($transactions);
         $this->dataSet->data =
             json_encode([
-                'processing' => false,
-                'basic'      => $basicDiagram,
+                'processing'    => false,
+                'error'         => $this->error,
+                'error_message' => $this->errorMessage,
+                'basic'         => $basicDiagram,
             ]);
         $this->dataSet->save();
     }
@@ -117,8 +128,16 @@ class ProcessTransactions implements ShouldQueue
             // first download withdrawals:
             $withdrawals = new GetTransactionsRequest($this->url, $this->token);
             $withdrawals->setFilter($date->format('Y-m-d'), $endOfMonth->format('Y-m-d'), 'withdrawal');
-            $result = $withdrawals->get();
-            $count  = 0;
+            try {
+                $result = $withdrawals->get();
+            } catch (ApiHttpException $e) {
+                Log::error(sprintf('Could not download from %s', $this->url));
+                Log::error($e->getMessage());
+                $this->error        = true;
+                $this->errorMessage = $e->getMessage();
+                return [];
+            }
+            $count = 0;
             /** @var TransactionGroup $transaction */
             foreach ($result as $transaction) {
                 $return[] = $transaction;

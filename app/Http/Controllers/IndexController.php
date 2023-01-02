@@ -75,6 +75,9 @@ class IndexController
         if (true === $data['processing']) {
             return view('diagram-nodata');
         }
+        if (true === $data['error']) {
+            return view('diagram-error')->with('error', $data['error_message']);
+        }
         //var_dump(json_decode($data, true));
 
         return view('diagram')->with('data', $data);
