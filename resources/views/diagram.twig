@@ -21,12 +21,6 @@
                 {from: '{{ row.from }}', to: '{{ row.to }}', flow: {{ row.amount }}},
             {% endfor %}
         ];
-        const priorities = {
-            {% for row in data.basic %}
-            '{{ row.to }}': 0,
-            {% endfor %}
-            'Out: Woning' :1,
-        };
 
         Utils.load(() => {
             const colors = [
@@ -49,8 +43,6 @@
             const ctx = document.getElementById('chart-area').getContext('2d');
             new Chart(ctx, {
                 type: 'sankey',
-                size: 'min',
-                priority: priorities,
                 data: {
                     datasets: [{
                         label: 'My Sankey',
