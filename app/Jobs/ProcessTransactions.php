@@ -81,6 +81,7 @@ class ProcessTransactions implements ShouldQueue
         // middle: the budget or (not budgeted)
         // out: the expense account the money goes to.
         $this->startJob();
+        Log::debug(sprintf('Done with job %s', $this->identifier));
     }
 
     /**
