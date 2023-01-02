@@ -1,0 +1,92 @@
+{% extends "./layout/default" %}
+{% block content %}
+    <p class="lead">
+        here be diagram
+    </p>
+    <div class="canvas-holder">
+        <canvas id="chart-area"></canvas>
+    </div>
+    <form method="post" action="{{ route('destroy') }}">
+        {{ csrf_field() }}
+        <button type="submit" class="btn btn-danger">Clear session and delete data</button>
+    </form>
+
+{% endblock %}
+
+{% block scripts %}
+    <script src="utils.js"></script>
+    <script>
+        const data = [
+            {% for row in data.basic %}
+                {from: '{{ row.from }}', to: '{{ row.to }}', flow: {{ row.amount }}},
+            {% endfor %}
+        ];
+        const priorities = {
+            {% for row in data.basic %}
+            '{{ row.to }}': 0,
+            {% endfor %}
+            'Out: Woning' :1,
+        };
+
+        Utils.load(() => {
+            const colors = [
+                '#1F77B4',
+                '#FF7F0E',
+                '#2CA02C',
+                '#D62728',
+                '#9467BD',
+                '#8C564B',
+                '#E377C2',
+                '#7F7F7F',
+                '#BCBD22'
+            ];
+            const assigned = {};
+            function getColor(name) {
+                return assigned[name] || (assigned[name] = colors[Object.keys(assigned).length % colors.length]);
+            }
+
+            Chart.defaults.font.size = 9;
+            const ctx = document.getElementById('chart-area').getContext('2d');
+            new Chart(ctx, {
+                type: 'sankey',
+                size: 'min',
+                priority: priorities,
+                data: {
+                    datasets: [{
+                        label: 'My Sankey',
+                        colorFrom: (c) => getColor(c.dataset.data[c.dataIndex].from),
+                        colorTo: (c) => getColor(c.dataset.data[c.dataIndex].to),
+                        data
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    tooltips: {
+                        callbacks: {
+                            title() {
+                                return data[tooltipItem.index].from;
+                            },
+                            label(context) {
+                                const item = context.dataset.data[context.dataIndex];
+                                return [item.from + ' -> ' + item.to, item.flow];
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            reverse: true,
+                            offset: true,
+                        },
+                        x: {
+                            type: 'linear',
+                            offset: true,
+                        }
+                    }
+                }
+            });
+
+        });
+    </script>
+{% endblock %}

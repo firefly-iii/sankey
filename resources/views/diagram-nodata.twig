@@ -1,0 +1,21 @@
+{% extends "./layout/default" %}
+{% block content %}
+    <p class="lead">
+        Thanks! Please wait for your diagram to be generated.
+    </p>
+    <p>
+        This can take a few minutes. Please do not close your browser.
+    </p>
+    <form method="post" action="{{ route('destroy') }}">
+        {{ csrf_field() }}
+        <button type="submit" class="btn btn-danger">Cancel and delete data</button>
+    </form>
+
+{% endblock %}
+{% block scripts %}
+    <script>
+        setTimeout(function() {
+            location.reload();
+        }, 5000);
+    </script>
+{% endblock %}

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Firefly III Sankey Diagram generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <style>
+        #canvas-holder {
+            width: 80%;
+            margin: auto;
+        }
+
+        div.canvas-holder {
+            width: 954px;
+            height: 600px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1>Firefly III Sankey diagram generator</h1>
+        </div>
+    </div>
+    {% block content %}{% endblock %}
+
+</div>
+<script src="jquery-3.6.3.min.js"></script>
+<script src="bootstrap/js/bootstrap.min.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>
