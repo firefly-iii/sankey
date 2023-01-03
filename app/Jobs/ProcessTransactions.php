@@ -200,11 +200,11 @@ class ProcessTransactions implements ShouldQueue
                 }
 
                 if ('withdrawal' === $transaction->type) {
-                    if (in_array($transaction->categoryId, $this->ignoreCategories, true)) {
+                    if ($this->ignoreByCategory($transaction)) {
                         $ignored++;
                         continue;
                     }
-                    if (in_array($transaction->budgetId, $this->ignoreBudgets, true)) {
+                    if ($this->ignoreByBudget($transaction)) {
                         $ignored++;
                         continue;
                     }
@@ -257,14 +257,14 @@ class ProcessTransactions implements ShouldQueue
                 }
                 // if is a deposit, then from = category, and to = "Budgeted"
                 if ('deposit' === $transaction->type) {
-                    if (in_array($transaction->categoryId, $this->ignoreCategories, true)) {
+                    if ($this->ignoreByCategory($transaction)) {
                         $ignored++;
                         continue;
                     }
                     // source name defaults to category.
                     $sourceName = '' === (string)$transaction->categoryName ? '(no category)' : sprintf('In: %s', $transaction->categoryName);
                     // but it could be revenue account name:
-                    if('revenue' === $this->sourceGrouping) {
+                    if ('revenue' === $this->sourceGrouping) {
                         $sourceName = '' === (string)$transaction->sourceName ? '(cash)' : sprintf('In: %s', $transaction->sourceName);
                     }
 
@@ -299,6 +299,43 @@ class ProcessTransactions implements ShouldQueue
      */
     private function ignoreByAccount(Transaction $transaction): bool
     {
-        return in_array($transaction->sourceId, $this->ignoreAccounts, true) || in_array($transaction->destinationId, $this->ignoreAccounts, true);
+        $result = in_array($transaction->sourceId, $this->ignoreAccounts, true) || in_array($transaction->destinationId, $this->ignoreAccounts, true);
+        if ($result) {
+            Log::debug(
+                sprintf(
+                    'Ignore transaction #%d because of source account #%d or destination account #%d.',
+                    $transaction->id,
+                    $transaction->sourceId,
+                    $transaction->destinationId
+                )
+            );
+        }
+        return $result;
+    }
+
+    /**
+     * @param  Transaction  $transaction
+     * @return bool
+     */
+    private function ignoreByCategory(Transaction $transaction): bool
+    {
+        $result = in_array($transaction->categoryId, $this->ignoreCategories, true);
+        if ($result) {
+            Log::debug(sprintf('Ignore transaction #%d because of category #%d.', $transaction->id, $transaction->categoryId));
+        }
+        return $result;
+    }
+
+    /**
+     * @param  Transaction  $transaction
+     * @return bool
+     */
+    private function ignoreByBudget(Transaction $transaction): bool
+    {
+        $result = in_array($transaction->budgetId, $this->ignoreBudgets, true);
+        if ($result) {
+            Log::debug(sprintf('Ignore transaction #%d because of budget #%d.', $transaction->id, $transaction->budgetId));
+        }
+        return $result;
     }
 }

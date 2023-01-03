@@ -48,11 +48,18 @@ class IndexController
         }
         $validated                      = $validator->validated();
         $validated['draw_destinations'] = $request->has('draw_destinations');
-        $validated['ignore_accounts']   = explode(',', $validated['ignore_accounts']);
-        $validated['ignore_categories'] = explode(',', $validated['ignore_categories']);
-        $validated['ignore_budgets']    = explode(',', $validated['ignore_budgets']);
+        $fields = ['ignore_accounts', 'ignore_categories', 'ignore_budgets'];
+        foreach($fields as $field) {
+            $data = $request->get($field);
+            if(null === $data) {
+                $validated[$field] = [];
+            }
+            if(null !== $data) {
+                $validated[$field]   = explode(',', $data);
+                $validated[$field]   = array_map('intval', $validated[$field]);
+            }
+        }
 
-        $validated['ignore_accounts']   = array_map('intval', $validated['ignore_accounts']);
         $validated['ignore_categories'] = array_map('intval', $validated['ignore_categories']);
         $validated['ignore_budgets']    = array_map('intval', $validated['ignore_budgets']);
         $validated['start']             = Carbon::createFromFormat('Y-m-d', $validated['start']);
