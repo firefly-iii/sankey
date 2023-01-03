@@ -185,6 +185,7 @@ class ProcessTransactions implements ShouldQueue
     {
         Log::debug(sprintf('Generate basic diagram from %d transaction(s)', count($transactions)));
         $result = [];
+        $ignored = 0;
         /** @var TransactionGroup $group */
         foreach ($transactions as $group) {
             /** @var Transaction $transaction */
@@ -193,23 +194,16 @@ class ProcessTransactions implements ShouldQueue
 
                 // ignore accounts?
                 if (in_array($transaction->sourceId, $this->ignoreAccounts, true) || in_array($transaction->destinationId, $this->ignoreAccounts, true)) {
-                    Log::debug(
-                        sprintf(
-                            'Ignore transaction #%d because of source ID #%d or destination ID #%d',
-                            $transaction->id,
-                            $transaction->sourceId,
-                            $transaction->destinationId
-                        )
-                    );
+                    $ignored++;
                     continue;
                 }
                 if ('withdrawal' === $transaction->type) {
                     if (in_array($transaction->categoryId, $this->ignoreCategories, true)) {
-                        Log::debug(sprintf('Ignore transaction #%d because of category ID #%d', $transaction->id, $transaction->categoryId));
+                        $ignored++;
                         continue;
                     }
                     if (in_array($transaction->budgetId, $this->ignoreBudgets, true)) {
-                        Log::debug(sprintf('Ignore transaction #%d because of budget ID #%d', $transaction->id, $transaction->budgetId));
+                        $ignored++;
                         continue;
                     }
 
@@ -261,7 +255,7 @@ class ProcessTransactions implements ShouldQueue
                 // if is a deposit, then from = category, and to = "Budgeted"
                 if ('deposit' === $transaction->type) {
                     if (in_array($transaction->categoryId, $this->ignoreCategories, true)) {
-                        Log::debug(sprintf('Ignore transaction #%d because of category ID #%d', $transaction->id, $transaction->categoryId));
+                        $ignored++;
                         continue;
                     }
 
@@ -286,7 +280,7 @@ class ProcessTransactions implements ShouldQueue
             }
         );
         ksort($result);
-        Log::debug(sprintf('Generated basic diagram with %d flows from %d transaction(s)', count($result), count($transactions)));
+        Log::debug(sprintf('Generated basic diagram with %d flows from %d (%d ignored) transaction(s)', count($result), $ignored, count($transactions)));
 
         return $result;
     }
