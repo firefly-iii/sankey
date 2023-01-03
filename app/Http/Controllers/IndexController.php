@@ -41,6 +41,7 @@ class IndexController
             'ignore_accounts'   => 'min:0,max:255',
             'ignore_categories' => 'min:0,max:255',
             'ignore_budgets'    => 'min:0,max:255',
+            'source_grouping'   => 'required|in:category,revenue',
         ]);
         if ($validator->fails()) {
             return redirect(route('index'))->withErrors($validator)->withInput();

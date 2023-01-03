@@ -36,6 +36,7 @@ class ProcessTransactions implements ShouldQueue
     private string  $errorMessage = '';
     private Carbon  $start;
     private Carbon  $end;
+    private string  $sourceGrouping;
 
     /**
      * Create a new job instance.
@@ -53,6 +54,7 @@ class ProcessTransactions implements ShouldQueue
         $this->drawDestination  = $parameters['draw_destinations'];
         $this->start            = $parameters['start'];
         $this->end              = $parameters['end'];
+        $this->sourceGrouping   = $parameters['source_grouping'];
     }
 
     /**
@@ -128,7 +130,7 @@ class ProcessTransactions implements ShouldQueue
             $endOfMonth->endOfMonth();
 
             // small catch in case we overflow:
-            if($endOfMonth->isAfter($end)) {
+            if ($endOfMonth->isAfter($end)) {
                 $endOfMonth = clone $end;
             }
 
@@ -184,19 +186,19 @@ class ProcessTransactions implements ShouldQueue
     private function createBasicDiagram(array $transactions): array
     {
         Log::debug(sprintf('Generate basic diagram from %d transaction(s)', count($transactions)));
-        $result = [];
+        $result  = [];
         $ignored = 0;
         /** @var TransactionGroup $group */
         foreach ($transactions as $group) {
             /** @var Transaction $transaction */
             foreach ($group->transactions as $transaction) {
                 $amount = (float)$transaction->amount;
-
-                // ignore accounts?
-                if (in_array($transaction->sourceId, $this->ignoreAccounts, true) || in_array($transaction->destinationId, $this->ignoreAccounts, true)) {
+                // ignore transaction if the account is set to be ignored
+                if ($this->ignoreByAccount($transaction)) {
                     $ignored++;
                     continue;
                 }
+
                 if ('withdrawal' === $transaction->type) {
                     if (in_array($transaction->categoryId, $this->ignoreCategories, true)) {
                         $ignored++;
@@ -251,6 +253,7 @@ class ProcessTransactions implements ShouldQueue
                                                   'amount' => 0.0,
                                               ];
                     $result[$key]['amount'] += $amount;
+                    unset($budget, $category);
                 }
                 // if is a deposit, then from = category, and to = "Budgeted"
                 if ('deposit' === $transaction->type) {
@@ -258,13 +261,18 @@ class ProcessTransactions implements ShouldQueue
                         $ignored++;
                         continue;
                     }
+                    // source name defaults to category.
+                    $sourceName = '' === (string)$transaction->categoryName ? '(no category)' : sprintf('In: %s', $transaction->categoryName);
+                    // but it could be revenue account name:
+                    if('revenue' === $this->sourceGrouping) {
+                        $sourceName = '' === (string)$transaction->sourceName ? '(cash)' : sprintf('In: %s', $transaction->sourceName);
+                    }
 
                     $sort                   = '10';
-                    $category               = '' === (string)$transaction->categoryName ? '(no category)' : sprintf('In: %s', $transaction->categoryName);
-                    $key                    = sprintf('%d-%s-%s', $sort, $category, $this->budgeted);
+                    $key                    = sprintf('%d-%s-%s', $sort, $sourceName, $this->budgeted);
                     $result[$key]           = $result[$key] ??
                                               [
-                                                  'from'   => $category,
+                                                  'from'   => $sourceName,
                                                   'to'     => $this->budgeted,
                                                   'amount' => 0.0,
                                               ];
@@ -280,8 +288,17 @@ class ProcessTransactions implements ShouldQueue
             }
         );
         ksort($result);
-        Log::debug(sprintf('Generated basic diagram with %d flows from %d (%d ignored) transaction(s)', count($result), $ignored, count($transactions)));
+        Log::debug(sprintf('Generated basic diagram with %d flows from %d (%d ignored) transaction(s)', count($result), count($transactions), $ignored));
 
         return $result;
+    }
+
+    /**
+     * @param  Transaction  $transaction
+     * @return bool
+     */
+    private function ignoreByAccount(Transaction $transaction): bool
+    {
+        return in_array($transaction->sourceId, $this->ignoreAccounts, true) || in_array($transaction->destinationId, $this->ignoreAccounts, true);
     }
 }

@@ -57,6 +57,31 @@
                 </div>
                 <div class="row mb-3">
                     <div class="col-4">
+                        <label for="draw_destinations">Group source by</label>
+                        <div class="form-text">
+                            Group your income by category or revenue account name.
+                        </div>
+                    </div>
+                    <div class="col-4">
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="source_grouping" value="category" checked id="source_grouping_category">
+                            <label class="form-check-label" for="source_grouping_category">
+                                Category
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="source_grouping" value="revenue" id="source_grouping_revenue">
+                            <label class="form-check-label" for="source_grouping_revenue">
+                                Revenue account (source of money)
+                            </label>
+                        </div>
+
+
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-4">
                         <label for="ignore_accounts">Optional: ignore these account ID's</label>
                         <div  class="form-text">
                             Comma-separated list. These source or destination accounts will not be included in the diagram.
