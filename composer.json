@@ -19,7 +19,7 @@
         "laravel/pint": "^1.0",
         "laravel/sail": "^1.17.0",
         "mockery/mockery": "^1.4.4",
-        "nunomaduro/collision": "^6.1",
+        "nunomaduro/collision": "^6.4",
         "phpunit/phpunit": "^9.5.10",
         "spatie/laravel-ignition": "^1.6"
     },
