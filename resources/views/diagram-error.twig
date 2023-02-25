@@ -1,0 +1,17 @@
+{% extends "./layout/default" %}
+{% block content %}
+    <p class="lead">
+        Sorry :(
+    </p>
+    <p>
+        An error occurred.
+    </p>
+    <p>
+        {{ error }}
+    </p>
+    <form method="post" action="{{ route('destroy') }}">
+        {{ csrf_field() }}
+        <button type="submit" class="btn btn-danger">Delete and start over</button>
+    </form>
+
+{% endblock %}

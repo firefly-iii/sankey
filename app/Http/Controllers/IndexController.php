@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Jobs\ProcessTransactions;
 use App\Models\DataSet;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Log;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -16,7 +18,7 @@ class IndexController
     /**
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
-    public function index()
+    public function index(Request $request)
     {
         if (!session()->has('identifier')) {
             $uuid = Uuid::uuid4();
@@ -34,26 +36,37 @@ class IndexController
         $validator = Validator::make($request->all(), [
             'url'               => 'required|url',
             'token'             => 'required',
-            'year'              => 'required|numeric|min:2000|max:2025',
+            'start'             => 'required|date|before:end',
+            'end'               => 'required|date|after:start',
             'ignore_accounts'   => 'min:0,max:255',
             'ignore_categories' => 'min:0,max:255',
             'ignore_budgets'    => 'min:0,max:255',
+            'source_grouping'   => 'required|in:category,revenue',
         ]);
         if ($validator->fails()) {
             return redirect(route('index'))->withErrors($validator)->withInput();
         }
         $validated                      = $validator->validated();
         $validated['draw_destinations'] = $request->has('draw_destinations');
-        $validated['ignore_accounts']   = explode(',', $validated['ignore_accounts']);
-        $validated['ignore_categories'] = explode(',', $validated['ignore_categories']);
-        $validated['ignore_budgets']    = explode(',', $validated['ignore_budgets']);
+        $fields = ['ignore_accounts', 'ignore_categories', 'ignore_budgets'];
+        foreach($fields as $field) {
+            $data = $request->get($field);
+            if(null === $data) {
+                $validated[$field] = [];
+            }
+            if(null !== $data) {
+                $validated[$field]   = explode(',', $data);
+                $validated[$field]   = array_map('intval', $validated[$field]);
+            }
+        }
 
-        $validated['year']              = (int)$validated['year'];
-        $validated['ignore_accounts']   = array_map('intval', $validated['ignore_accounts']);
         $validated['ignore_categories'] = array_map('intval', $validated['ignore_categories']);
         $validated['ignore_budgets']    = array_map('intval', $validated['ignore_budgets']);
+        $validated['start']             = Carbon::createFromFormat('Y-m-d', $validated['start']);
+        $validated['end']               = Carbon::createFromFormat('Y-m-d', $validated['end']);
 
         $identifier = session()->get('identifier');
+        Log::debug(sprintf('Stored new job under identifier %s', $identifier));
         ProcessTransactions::dispatch($identifier, $validated);
         return redirect(route('diagram'));
     }
@@ -74,6 +87,9 @@ class IndexController
         $data = json_decode($dataSet->data, true);
         if (true === $data['processing']) {
             return view('diagram-nodata');
+        }
+        if (true === $data['error']) {
+            return view('diagram-error')->with('error', $data['error_message']);
         }
         //var_dump(json_decode($data, true));
 

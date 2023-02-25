@@ -1,15 +1,20 @@
 {% extends "./layout/default" %}
 {% block content %}
-    <p class="lead">
-        here be diagram
-    </p>
-    <div class="canvas-holder">
-        <canvas id="chart-area"></canvas>
+    <div class="row">
+        <div class="col">
+            <div class="canvas-holder" style="width:100%;">
+                <canvas id="chart-area" style="width:100%;" aria-label="Sankey diagram" role="img"></canvas>
+            </div>
+        </div>
     </div>
-    <form method="post" action="{{ route('destroy') }}">
-        {{ csrf_field() }}
-        <button type="submit" class="btn btn-danger">Clear session and delete data</button>
-    </form>
+    <div class="row">
+        <div class="col">
+            <form method="post" action="{{ route('destroy') }}">
+                {{ csrf_field() }}
+                <button type="submit" class="btn btn-danger">Clear session and delete data</button>
+            </form>
+        </div>
+    </div>
 
 {% endblock %}
 
@@ -18,15 +23,9 @@
     <script>
         const data = [
             {% for row in data.basic %}
-                {from: '{{ row.from }}', to: '{{ row.to }}', flow: {{ row.amount }}},
+            {from: '{{ row.from }}', to: '{{ row.to }}', flow: {{ row.amount }}},
             {% endfor %}
         ];
-        const priorities = {
-            {% for row in data.basic %}
-            '{{ row.to }}': 0,
-            {% endfor %}
-            'Out: Woning' :1,
-        };
 
         Utils.load(() => {
             const colors = [
@@ -41,6 +40,7 @@
                 '#BCBD22'
             ];
             const assigned = {};
+
             function getColor(name) {
                 return assigned[name] || (assigned[name] = colors[Object.keys(assigned).length % colors.length]);
             }
@@ -49,8 +49,6 @@
             const ctx = document.getElementById('chart-area').getContext('2d');
             new Chart(ctx, {
                 type: 'sankey',
-                size: 'min',
-                priority: priorities,
                 data: {
                     datasets: [{
                         label: 'My Sankey',
@@ -60,6 +58,10 @@
                     }]
                 },
                 options: {
+                    animation: false,
+                    layout: {
+                        padding: 0
+                    },
                     responsive: true,
                     maintainAspectRatio: false,
                     tooltips: {
