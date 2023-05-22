@@ -15,7 +15,7 @@
         "rcrowe/twigbridge": "^0.14.1"
     },
     "require-dev": {
-        "fakerphp/faker": "^1.9.1",
+        "fakerphp/faker": "^1.22.0",
         "laravel/pint": "^1.5",
         "laravel/sail": "^1.22.0",
         "mockery/mockery": "^1.4.4",
