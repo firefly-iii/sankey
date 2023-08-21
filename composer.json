@@ -20,7 +20,7 @@
         "laravel/sail": "^1.23.2",
         "mockery/mockery": "^1.6.6",
         "nunomaduro/collision": "^6.4",
-        "phpunit/phpunit": "^9.6.10",
+        "phpunit/phpunit": "^9.6.11",
         "spatie/laravel-ignition": "^1.6"
     },
     "autoload": {
