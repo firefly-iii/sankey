@@ -9,7 +9,7 @@
         "firefly-iii/api-support-classes": "dev-main",
         "guzzlehttp/guzzle": "^7.8",
         "laravel/framework": "^9.52",
-        "laravel/sanctum": "^3.2",
+        "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
         "ramsey/uuid": "^4.7",
         "rcrowe/twigbridge": "^0.14.1"
